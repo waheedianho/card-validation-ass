@@ -1,8 +1,11 @@
 import { IsString, IsNotEmpty, Matches, Length } from 'class-validator';
 import { IsLuhnValid } from './validators/luhn.validator';
+import { ApiProperty } from '@nestjs/swagger';
+
 
 export class CardDto {
 
+    @ApiProperty()
     @IsNotEmpty({ message: 'cardNo must not be empty' })
     @IsString({ message: 'cardNo must be a string' })
     @Matches(/^[\d\s-]+$/, {

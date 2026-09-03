@@ -6,6 +6,8 @@ import { ISecretsAdapter } from './infra/secret';
 import { AppExceptionFilter } from './middlewares/exception-filter.js';
 import { ResponseFormatterMiddleware } from './middlewares/response-formatter.js';
 import { ValidationPipe } from './middlewares/validation-pipe.js';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 
 const loggerService = new Logger(name);
 
@@ -47,11 +49,14 @@ async function bootstrap() {
 
   if (!IS_PRODUCTION) {
     try {
-
-
-
-
-
+      const config = new DocumentBuilder()
+        .setTitle('Card Validation')
+        .setDescription('This system validate card number')
+        .setVersion('1.0')
+        .addTag('Card')
+        .build();
+      const document = SwaggerModule.createDocument(app, config);
+      SwaggerModule.setup('api', app, document);
     } catch (error) {
       loggerService.warn({ message: 'Failed to load Swager API documentation', obj: { originalError: error } })
     }
