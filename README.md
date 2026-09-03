@@ -1,114 +1,273 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Card Validation API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS REST API that validates payment card numbers using the **Luhn algorithm**, detects the **card network** (Visa, Mastercard, Amex, etc.), and returns a masked card number. Built with TypeScript, Vitest, and Swagger.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table of Contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Running the Project](#running-the-project)
+- [API Reference](#api-reference)
+- [Testing](#testing)
+- [Project Architecture](#project-architecture)
+- [Design Decisions](#design-decisions)
 
-## Project setup
+---
 
-```bash
-$ pnpm install
-```
+## Getting Started
 
-## Compile and run the project
+### Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Node.js | ≥ 20 |
+| pnpm | ≥ 9 |
+| PostgreSQL | ≥ 14 (required by the infra layer, though not used by the validation endpoint itself) |
+
+### Installation
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
 ```
 
-## Run tests
+---
+
+## Environment Variables
+
+Copy the `.env` file (already present in the repo) and adjust the values for your environment. The critical variables are:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `5000` | HTTP port the API listens on |
+| `NODE_ENV` | `local` | Environment name (`local`, `development`, `production`) |
+| `HOST` | `http://localhost:5000` | Public base URL |
+| `POSTGRES_HOST` | `localhost` | PostgreSQL host |
+| `POSTGRES_PORT` | `5433` | PostgreSQL port |
+| `POSTGRES_USER` | `card-validation` | PostgreSQL user |
+| `POSTGRES_PASSWORD` | `0987654321` | PostgreSQL password |
+| `POSTGRES_DATABASE` | `card-validation` | PostgreSQL database name |
+| `TZ` | `America/Sao_Paulo` | Process timezone |
+
+> **Note:** The card validation endpoint itself is stateless and does not require a database connection to function. The PostgreSQL config is wired up for future persistence needs.
+
+---
+
+## Running the Project
+
+### Development (watch mode)
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm start:dev
 ```
 
-## Deployment
+The server will start on `http://localhost:5000` by default, and reload automatically on file changes.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Production
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm build
+pnpm start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Debug mode
 
-## Observability
+```bash
+pnpm start:debug
+```
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+---
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+## API Reference
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+### Swagger UI
 
-## Resources
+When running in a non-production environment (`NODE_ENV` ≠ `production`), interactive Swagger docs are available at:
 
-Check out a few resources that may come in handy when working with NestJS:
+```
+http://localhost:5000/api
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+### `POST /card` — Validate a card number
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Validates the supplied card number and returns network information and a masked version.
 
-## Stay in touch
+**Request body**
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```json
+{
+  "cardNo": "4532015112830366"
+}
+```
 
-## License
+The `cardNo` field accepts digits, spaces, and dashes (e.g. `4532-0151-1283-0366` or `4532 0151 1283 0366`).
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Validation rules applied (in order)**
+
+1. Must not be empty
+2. Must be a string
+3. Must contain only digits, spaces, or dashes
+4. Must be between 13 and 23 characters long (including separators)
+5. Must pass the **Luhn algorithm** check
+
+**Success response — `200 OK`**
+
+```json
+{
+  "status": 200,
+  "message": "Card is valid",
+  "data": {
+    "cardNo": "4532015112830366",
+    "isValid": true,
+    "network": "Visa",
+    "isValidLength": true,
+    "maskedCardNo": "**** **** **** 0366"
+  }
+}
+```
+
+**Response fields**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cardNo` | `string` | The original (unsanitized) card number as supplied |
+| `isValid` | `boolean` | Always `true` when the endpoint returns 200 (validation happens in the pipe) |
+| `network` | `string` | Detected card network (see supported networks below) |
+| `isValidLength` | `boolean` | Whether the digit count matches the network's specification |
+| `maskedCardNo` | `string` | Card number with all but the last 4 digits replaced by `****` groups |
+
+**Supported card networks**
+
+| Network | Prefix | Length(s) |
+|---------|--------|-----------|
+| Visa | `4` | 13, 16, 19 |
+| Mastercard | `51–55`, `2221–2720` | 16 |
+| American Express | `34`, `37` | 15 |
+| Discover | `6011`, `65xx`, `644–649`, `622126–622925` | 16, 19 |
+| JCB | `3528–3589` | 16 |
+| Diners Club | `300–305`, `36`, `38` | 14 |
+| UnionPay | `62` | 16–19 |
+| Maestro | `6304`, `6759`, `6761–6763` | 12–19 |
+| Unknown | — | — |
+
+**Error response — `422 Unprocessable Entity`** (validation failure)
+
+```json
+{
+  "status": 422,
+  "message": "cardNo must be a valid card number (Luhn check failed)"
+}
+```
+
+---
+
+## Testing
+
+All tests are written with **Vitest** and the NestJS testing utilities.
+
+### Run all unit tests
+
+```bash
+pnpm test
+```
+
+### Run in watch mode
+
+```bash
+pnpm test:watch
+```
+
+### Generate coverage report
+
+```bash
+pnpm test:cov
+```
+
+### Run end-to-end tests
+
+```bash
+pnpm test:e2e
+```
+
+### Test files
+
+| File | What it covers |
+|------|----------------|
+| `src/application/card/service.spec.ts` | `IsLuhnValidConstraint`, `detectCardNetwork`, `CardService` |
+| `src/api/card/endpoint.spec.ts` | `CardEndpoint` (controller), mocked service |
+
+---
+
+## Project Architecture
+
+The project follows a **layered architecture** inspired by Clean Architecture / DDD:
+
+```
+src/
+├── api/                  # Controllers (HTTP interface)
+│   └── card/
+│       ├── endpoint.ts           # POST /card controller
+│       └── endpoint.spec.ts      # Unit tests for the controller
+│
+├── application/          # Use-case / business logic layer
+│   └── card/
+│       ├── dto.ts                # CardDto — request validation via class-validator
+│       ├── service.ts            # CardService — core validation logic
+│       ├── service.spec.ts       # Unit tests for service + validators
+│       └── validators/
+│           ├── luhn.validator.ts         # Custom @IsLuhnValid() decorator
+│           └── card-network.util.ts      # Network detection utility
+│
+├── domain/               # Domain entities (currently a placeholder module)
+│
+├── infra/                # Infrastructure (Postgres, secrets)
+│   ├── postgres/
+│   └── secret/
+│
+├── middlewares/          # Global NestJS middleware
+│   ├── exception-filter.ts       # Global error handler
+│   ├── response-formatter.ts     # Wraps all responses in a standard envelope
+│   └── validation-pipe.ts        # Runs class-validator on incoming DTOs
+│
+├── app.module.ts         # Root application module
+└── main.ts               # Bootstrap — wires up Swagger, global middleware, and listens
+```
+
+---
+
+## Design Decisions
+
+### 1. Luhn algorithm as a custom `class-validator` decorator
+
+Rather than running the Luhn check inside the service, validation is handled declaratively on the `CardDto` using a custom `@IsLuhnValid()` decorator. This keeps the service thin and ensures that invalid cards are rejected at the HTTP boundary before any business logic runs, consistent with how the other `class-validator` rules work.
+
+### 2. Separator-tolerant input (`cardNo` accepts spaces and dashes)
+
+Users commonly enter card numbers with spaces (`4532 0151 1283 0366`) or dashes. The `Matches` decorator allows these characters, and both the Luhn validator and `CardService` strip separators before processing — so the caller never needs to pre-format the number.
+
+### 3. Length validation covers separator characters in the DTO
+
+The `@Length(13, 23)` constraint is applied to the *raw* string (including spaces/dashes). The upper bound is 23 rather than 19 to accommodate a 19-digit card with 4 separator characters (`xxxx-xxxx-xxxx-xxxx-xxx` = 23 chars). The network-specific length check (`isValidLength`) in the service operates on the sanitized digit string.
+
+### 4. `isValidLength` is informational, not a blocking error
+
+The service always returns `isValid: true` when it reaches the service layer (the Luhn check in the DTO already blocked invalid numbers). `isValidLength` tells the caller whether the digit count matches the detected network's known lengths — useful for detecting unusual card variants — without breaking the response contract.
+
+### 5. Response envelope via `ResponseFormatterMiddleware`
+
+All responses are wrapped in a consistent `{ status, message, data }` envelope by the `ResponseFormatterMiddleware`, which attaches a `formatResponse` helper to the Express `Response` object. This avoids boilerplate in every controller.
+
+### 6. Swagger only in non-production environments
+
+The `DocumentBuilder` setup in `main.ts` is wrapped in an `if (!IS_PRODUCTION)` guard, so the API docs endpoint is never exposed in production. A `try/catch` around it ensures a Swagger bootstrap failure degrades gracefully with a warning log rather than crashing the server.
+
+### 7. Vitest over Jest
+
+Vitest was chosen as the test runner because it shares the same config file as Vite/esbuild and runs significantly faster than Jest for TypeScript projects. It is configured via `vitest.config.ts` with `vite-tsconfig-paths` so that TypeScript path aliases resolve correctly in tests without a separate build step.
+
+### 8. `pnpm` as the package manager
+
+`pnpm` is used for its strict dependency isolation and fast, disk-efficient installs. A `pnpm-workspace.yaml` is present for potential future monorepo expansion.
