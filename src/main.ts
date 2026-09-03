@@ -1,8 +1,11 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule, ObserveInstrument } from './app.module.js';
 import { Logger } from '@nestjs/common';
 import { name } from '../package.json'
 import { ISecretsAdapter } from './infra/secret';
+import { AppExceptionFilter } from './middlewares/exception-filter.js';
+import { ResponseFormatterMiddleware } from './middlewares/response-formatter.js';
+import { ValidationPipe } from './middlewares/validation-pipe.js';
 
 const loggerService = new Logger(name);
 
@@ -24,8 +27,10 @@ async function bootstrap() {
 
 
   app.useLogger(loggerService)
-  app.useGlobalFilters()
+  app.useGlobalFilters(new AppExceptionFilter(app.get(HttpAdapterHost), loggerService))
 
+  app.useGlobalPipes(new ValidationPipe(loggerService))
+  app.use(new ResponseFormatterMiddleware().use)
 
   app.enableCors()
   app.useGlobalFilters()
@@ -38,6 +43,19 @@ async function bootstrap() {
   process.on('unhandledRejection', (error) => {
     loggerService.error(error as Error)
   })
+
+
+  if (!IS_PRODUCTION) {
+    try {
+
+
+
+
+
+    } catch (error) {
+      loggerService.warn({ message: 'Failed to load Swager API documentation', obj: { originalError: error } })
+    }
+  }
 
 
 
