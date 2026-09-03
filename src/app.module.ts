@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
-import { ApplicationModule } from './application/application.module.js';
+import { ApplicationModule } from './application/module.js';
 import { InfraModule } from './infra/module.js';
-import { ApiModule } from './api/api.module.js';
-import { DomainModule } from './domain/domain.module.js';
+import { ApiModule } from './api/module.js';
+import { DomainModule } from './domain/module.js';
 
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
